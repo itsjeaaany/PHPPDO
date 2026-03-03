@@ -1,24 +1,27 @@
 <?php
-include "config.php";
+require 'config.php';
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
+if (isset($_POST['add'])){
 
-$name = $_POST['name'];
-$email = $_POST['email'];
-$product = $_POST['product'];
-$amount = $_POST['amount'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $product = $_POST['product'];
+    $amount = $_POST['amount'];
 
-$sql = "INSERT INTO users (name,email,product,amount)
-        VALUES (:name,:email,:product,:amount)";
+    $stmt = $pdo->prepare("INSERT INTO users (name, email) 
+    VALUES (?,?)");
+    $stmt->execute([$name, $email]);
 
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-    ':name'=>$name,
-    ':email'=>$email,
-    ':product'=>$product,
-    ':amount'=>$amount
-]);
 
-header("Location: landing.php");
+    $user_id = $pdo->lastInsertId();
+
+
+    $stmt2 = $pdo->prepare("INSERT INTO orders (users_id, product, amount)
+    VALUES (?,?,?)");
+    $stmt2->execute([$user_id, $product, $amount]);
+
+    // Redirect back with success flag
+    header('Location: landing.php?added');
+    exit;
 }
 ?>
