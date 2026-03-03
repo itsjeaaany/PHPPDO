@@ -1,35 +1,25 @@
 <?php
-include "config.php";
+require 'config.php';
 
-$id = $_GET['users_id'];
+if (isset($_POST['update'])) {
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
+    $users_id = $_POST['users_id'];  // FIXED
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $product = $_POST['product'];
+    $amount = $_POST['amount'];
 
-$name = $_POST['name'];
-$email = $_POST['email'];
-$product = $_POST['product'];
-$amount = $_POST['amount'];
+    $stmt = $pdo->prepare("UPDATE users 
+                           SET name = ?, email = ? 
+                           WHERE users_id = ?");
+    $stmt->execute([$name, $email, $users_id]);
 
-$sql = "UPDATE users SET 
-        name=:name,
-        email=:email,
-        product=:product,
-        amount=:amount
-        WHERE users_id=:users_id";
+    $stmt2 = $pdo->prepare("UPDATE orders 
+                            SET product = ?, amount = ? 
+                            WHERE users_id = ?");
+    $stmt2->execute([$product, $amount, $users_id]);
 
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-':name'=>$name,
-':email'=>$email,
-':product'=>$product,
-':amount'=>$amount,
-':users_id'=>$users_id,
-]);
-
-header("Location: landing.php");
+    header("Location: landing.php");
+    exit();
 }
-
-$stmt = $conn->prepare("SELECT * FROM users WHERE users_id=:users_id");
-$stmt->execute([':users_id'=>$users_id]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
